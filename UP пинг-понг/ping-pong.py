@@ -12,17 +12,25 @@ class Game_sprite(sprite.Sprite):
     def reset(self):
         window.blit(self.image, (self.rect.x,self.rect.y))
 class Player(Game_sprite):
-    def updateR(self):
-        key_pressed = key.get_pressed()
-        if key_pressed[K_UP] and self.rect.y >= 2:
-            self.rect.y -= self.speed
-        if key_pressed[K_DOWN] and self.rect.y  <= 340:
-            self.rect.y += self.speed
     def updateL(self):
+        global moveL
+        moveL = 1
         key_pressed = key.get_pressed()
         if key_pressed[K_w] and self.rect.y >= 2:
+            moveL = 2
             self.rect.y -= self.speed
         if key_pressed[K_s] and self.rect.y  <= 340:
+            moveL = -2
+            self.rect.y += self.speed
+    def updateR(self):
+        global moveR
+        moveR = 1
+        key_pressed = key.get_pressed()
+        if key_pressed[K_UP] and self.rect.y >= 2:
+            moveR = 2
+            self.rect.y -= self.speed
+        if key_pressed[K_DOWN] and self.rect.y  <= 340:
+            moveR = -2
             self.rect.y += self.speed
 class Ball(Game_sprite):
     def update(self,x,y,upy):
@@ -45,6 +53,7 @@ play_time = True
 updatey = False
 clock = time.Clock()
 while game_rendering:
+    global moveL, moveR
     if p:
         start_time = time.get_ticks()
     clock.tick(60)
@@ -53,8 +62,14 @@ while game_rendering:
             game_rendering = False
     if play_time:
         current_time = time.get_ticks()
-        if sprite.collide_rect(ball,player1) or sprite.collide_rect(ball,player2):
+        if sprite.collide_rect(ball,player1):
             dx *= -1
+            if dy != moveL:
+                dy *= -1
+        if sprite.collide_rect(ball,player2):
+            dx *= -1
+            if dy != moveR:
+                dy *= -1    
         if ball.rect.y <= 0 or ball.rect.y >= 450:
             dy *= -1
         if current_time-start_time >= 3000:
@@ -69,6 +84,7 @@ while game_rendering:
         display.update()
         if ball.rect.x <= 0 or ball.rect.x >= 700:
             window.blit(over,(300,200))
+            display.update()
             play_time = False
         if p:
             window.blit(timer,(300,100))
